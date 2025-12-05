@@ -4,7 +4,7 @@
 This package contains the fully optimized and refactored portfolio website for Sayam Mattoo.
 
 ## Files Included
-- **Portfolio.html**: Main HTML file with updated structure, metadata, and content.
+- **index.html**: Main HTML file with updated structure, metadata, and content.
 - **styles.css**: External CSS file with optimized styles, variables, and accessibility enhancements.
 - **script.js**: External JavaScript file with deferred logic, mobile menu handling, and form submission.
 - **favicon.png**: Generated favicon.
@@ -38,7 +38,7 @@ This package contains the fully optimized and refactored portfolio website for S
     -   `papers/blockchain-student-records.pdf`
     -   `papers/cloud-printing-architecture.pdf`
 3.  **Contact Form**:
-    -   Open `Portfolio.html` and search for `YOUR_ACCESS_KEY_HERE`.
+    -   Open `index.html` and search for `YOUR_ACCESS_KEY_HERE`.
     -   Replace it with your actual Web3Forms Access Key.
 4.  **Deployment**:
     -   Upload all files to your host (Netlify, Vercel, GitHub Pages).
