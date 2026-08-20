@@ -1,1 +1,132 @@
-document.addEventListener('DOMContentLoaded', () => { const themeToggle = document.getElementById('themeToggle'); const html = document.documentElement; const savedTheme = localStorage.getItem('theme') || 'dark'; html.setAttribute('data-theme', savedTheme); updateThemeIcon(savedTheme); themeToggle.addEventListener('click', () => { const current = html.getAttribute('data-theme'); const next = current === 'light' ? 'dark' : 'light'; html.setAttribute('data-theme', next); localStorage.setItem('theme', next); updateThemeIcon(next) }); function updateThemeIcon(theme) { themeToggle.textContent = theme === 'light' ? '🌙' : '☀'; themeToggle.setAttribute('aria-label', `Switch to ${theme === 'light' ? 'dark' : 'light'} mode`) } const mobileMenuBtn = document.getElementById('mobileMenuBtn'); const navLinks = document.getElementById('navLinks'); const navLinksItems = document.querySelectorAll('.nav-links a'); function toggleMenu() { const isActive = navLinks.classList.toggle('active'); mobileMenuBtn.textContent = isActive ? '✕' : '☰'; mobileMenuBtn.setAttribute('aria-expanded', isActive); document.body.style.overflow = isActive ? 'hidden' : '' } mobileMenuBtn.addEventListener('click', toggleMenu); navLinksItems.forEach(link => { link.addEventListener('click', () => { if (navLinks.classList.contains('active')) { toggleMenu() } }) }); document.addEventListener('click', (e) => { if (navLinks.classList.contains('active') && !navLinks.contains(e.target) && !mobileMenuBtn.contains(e.target)) { toggleMenu() } }); const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }; const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('active'); observer.unobserve(entry.target) } }) }, observerOptions); document.querySelectorAll('.reveal').forEach(el => observer.observe(el)); document.querySelectorAll('a[href^="#"]').forEach(anchor => { anchor.addEventListener('click', function (e) { e.preventDefault(); const targetId = this.getAttribute('href'); if (targetId === '#') return; const targetElement = document.querySelector(targetId); if (targetElement) { targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' }); history.pushState(null, null, targetId) } }) }); if (window.matchMedia("(min-width: 769px)").matches && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) { document.addEventListener('mousemove', (e) => { const x = e.clientX / window.innerWidth; const y = e.clientY / window.innerHeight; const glow1 = document.querySelector('.bg-glow'); const glow2 = document.querySelector('.bg-glow-2'); if (glow1) glow1.style.transform = `translate(${x * 20}px, ${y * 20}px)`; if (glow2) glow2.style.transform = `translate(${-x * 20}px, ${-y * 20}px)` }) } const form = document.getElementById('contactForm'); if (form) { form.addEventListener('submit', async (e) => { e.preventDefault(); const honeypot = document.getElementById('bot-field'); if (honeypot && honeypot.value) return; const submitBtn = form.querySelector('button[type="submit"]'); const originalText = submitBtn.textContent; submitBtn.textContent = 'Sending...'; submitBtn.disabled = true; try { const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'Accept': 'application/json' } }); if (response.ok) { showToast('Message sent successfully!'); form.reset() } else { showToast('Something went wrong. Please try again.', true) } } catch (error) { showToast('Error sending message.', true) } finally { submitBtn.textContent = originalText; submitBtn.disabled = false } }) } function showToast(message, isError = false) { let toast = document.getElementById('toast'); if (!toast) { toast = document.createElement('div'); toast.id = 'toast'; toast.className = 'toast'; document.body.appendChild(toast) } toast.textContent = message; toast.style.borderColor = isError ? '#ef4444' : 'var(--primary)'; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show') }, 3000) } const yearEl = document.getElementById('year'); if (yearEl) { yearEl.textContent = new Date().getFullYear() } });
+document.addEventListener('DOMContentLoaded', () => {
+  // Theme toggle
+  const themeToggle = document.getElementById('themeToggle');
+  const html = document.documentElement;
+  const themeIcon = themeToggle?.querySelector('.theme-icon');
+  const savedTheme = localStorage.getItem('theme') || 'light';
+
+  html.setAttribute('data-theme', savedTheme);
+  updateThemeIcon(savedTheme);
+
+  themeToggle?.addEventListener('click', () => {
+    const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    updateThemeIcon(next);
+  });
+
+  function updateThemeIcon(theme) {
+    if (!themeIcon) return;
+    themeIcon.textContent = theme === 'light' ? '☀' : '☾';
+    themeToggle.setAttribute('aria-label', `Switch to ${theme === 'light' ? 'dark' : 'light'} mode`);
+  }
+
+  // Mobile menu
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const navLinks = document.getElementById('navLinks');
+
+  function toggleMenu() {
+    const isActive = navLinks.classList.toggle('active');
+    mobileMenuBtn.setAttribute('aria-expanded', isActive);
+    document.body.style.overflow = isActive ? 'hidden' : '';
+  }
+
+  mobileMenuBtn?.addEventListener('click', toggleMenu);
+
+  navLinks?.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (navLinks.classList.contains('active')) toggleMenu();
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (
+      navLinks?.classList.contains('active') &&
+      !navLinks.contains(e.target) &&
+      !mobileMenuBtn?.contains(e.target)
+    ) {
+      toggleMenu();
+    }
+  });
+
+  // Header scroll compact
+  const header = document.getElementById('header');
+  let lastScroll = 0;
+
+  function onScroll() {
+    const scrollY = window.scrollY;
+    if (scrollY > 60) {
+      header?.classList.add('scrolled');
+    } else {
+      header?.classList.remove('scrolled');
+    }
+    lastScroll = scrollY;
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Scroll reveal
+  const observerOptions = {
+    threshold: 0.08,
+    rootMargin: '0px 0px -40px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      const targetId = this.getAttribute('href');
+      if (targetId === '#') return;
+      e.preventDefault();
+      const target = document.querySelector(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, null, targetId);
+      }
+    });
+  });
+
+  // Active nav link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navItems = document.querySelectorAll('.nav-links a');
+
+  function updateActiveNav() {
+    const scrollPos = window.scrollY + 120;
+    sections.forEach(section => {
+      const top = section.offsetTop;
+      const height = section.offsetHeight;
+      const id = section.getAttribute('id');
+      if (scrollPos >= top && scrollPos < top + height) {
+        navItems.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+        });
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateActiveNav, { passive: true });
+  updateActiveNav();
+
+  // Experience: only one open at a time on desktop
+  const expItems = document.querySelectorAll('.exp-item');
+  expItems.forEach(item => {
+    item.addEventListener('toggle', () => {
+      if (item.open) {
+        expItems.forEach(other => {
+          if (other !== item) other.open = false;
+        });
+      }
+    });
+  });
+});
